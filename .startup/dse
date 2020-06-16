@@ -15,7 +15,10 @@ if [ $(echo $PATH | grep dse-6.8.0/bin | wc -l) -lt 1 ]; then
 fi
 
 # Install libaio
-sudo apt-get install -y libaio1
+sudo apt-get update
+sudo apt-get install -y libaio1 openjdk-8-jdk openjdk-8-jdk-headless python python3 python3-pip
+echo "alias python=python3" >> $HOME/.bash_aliases
+echo "alias pip=pip3" >> $HOME/.bash_aliases
 
 # Create folders
 sudo mkdir -p /var/log/cassandra
