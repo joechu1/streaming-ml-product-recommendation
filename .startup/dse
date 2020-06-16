@@ -2,9 +2,9 @@
 
 cd $HOME
 if [ ! -d dse-6.8.0 ]; then
-   wget https://downloads.datastax.com/enterprise/dse-6.8-0.tar.gz
-   tar -xzf dse-6.8.0.tar.gz
-   rm dse-6.8.0.tar.gz
+   wget https://downloads.datastax.com/enterprise/dse-6.8.0-bin.tar.gz
+   tar -xzf dse-6.8.0-bin.tar.gz
+   rm dse-6.8.0-bin.tar.gz
 fi
 cd dse-6.8.0
 
@@ -51,12 +51,12 @@ sudo sed -i 's/# realtime_evaluation_timeout_in_seconds: 30/realtime_evaluation_
 sudo sed -i 's/# resource_manager_options:/resource_manager_options:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
 sudo sed -i 's/#     worker_options:/    worker_options:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
 sudo sed -i 's/#         cores_total: 0.7/        cores_total: 2/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
-sudo sed -i 's/#         memory_total: 0.6/        memory_total: 0.6/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#         memory_total: 0.6/        memory_total: 2048M/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
 sudo sed -i 's/#         workpools:/        workpools:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
 sudo sed -i 's/#             - name: alwayson_sql/            - name: alwayson_sql/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
-sudo sed -i 's/#               cores: 0.25/              cores: 0.25/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
-sudo sed -i 's/#               memory: 0.25/              memory: 0.3/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
-sudo sed -i 's/# alwayson_sql_options:/alwayson_sql_options:\\n      enabled: true/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#               cores: 0.25/              cores: 1/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#               memory: 0.25/              memory: 1024M/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/# alwayson_sql_options:/alwayson_sql_options:\n      enabled: true/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
 
 # Start DSE with everything enabled 
 $HOME/dse-6.8.0/bin/dse cassandra -s -k -g

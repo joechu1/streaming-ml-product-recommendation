@@ -9,6 +9,7 @@ DL_SUFFIX=Linux-64bit
 INNER_SUFFIX=linux_amd64
 HUGO_VERSION=0.27
 
+IP=$(hostname -i)
 if [[ $HOSTNAME == "node"* ]] ; then
     #rightscale
     IP=$(grep $(hostname)_ext /etc/hosts | awk '{print $1}')
@@ -22,5 +23,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 FILENAME=Streaming_ML_Product_Recommendation_2018-07-09_14_37_48.studio-nb.tar
+
+TIMEOUT=120
+i=$TIMEOUT
+
+while [ "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9091)" != "200" ]; do sleep 1; i=$(($i-1)); if [ $i -lt 1 ]; then echo "Timeout after $TIMEOUT seconds"; break; fi; done
 
 curl -H "Accept-Encoding: gzip" -X POST -F 'file=@'$FILENAME http://"$IP":9091/api/v1/notebooks/import &> /dev/null

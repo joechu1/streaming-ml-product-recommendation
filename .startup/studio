@@ -4,6 +4,8 @@ cd $HOME
 if [ ! -d datastax-studio-6.8.0 ]; then
    wget https://downloads.datastax.com/datastax-studio/datastax-studio-6.8.0.tar.gz
    tar -xzf datastax-studio-6.8.0.tar.gz
+   rm datastax-studio-6.8.0.tar.gz
+   rm $HOME/datastax-studio-6.8.0/examples/notebooks/*
 fi
 cd datastax-studio-6.8.0
 
