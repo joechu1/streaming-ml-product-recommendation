@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd $HOME
+if [ ! -d datastax-studio-6.8.0 ]; then
+   wget https://downloads.datastax.com/datastax-studio/datastax-studio-6.8.0.tar.gz
+   tar -xzf datastax-studio-6.8.0.tar.gz
+fi
+cd datastax-studio-6.8.0
+
+kill $(lsof -i:9091 | grep LISTEN | awk '{print $2}')
+
+if [ $(echo $PATH | grep datastax-studio-6.8.0/bin | wc -l) -lt 1 ]; then
+   echo "PATH=\"\$PATH:\$HOME/datastax-studio-6.8.0/bin\"" >> $HOME/.bashrc
+fi
+
+sed -i 's/^  httpBindAddress: localhost/  httpBindAddress: 0.0.0.0/' $HOME/datastax-studio-6.8.0/conf/configuration.yaml
+$HOME/datastax-studio-6.8.0/bin/server.sh &

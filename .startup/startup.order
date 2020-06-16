@@ -1,11 +1,13 @@
 #websocketd
 #che
 mvn
+dse
 #dsefs
 #hugo
 #stream
 kafka
 streamingJob
 productTable
+studio
 uploadNotebook
 #mysql

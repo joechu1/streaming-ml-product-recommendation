@@ -1,0 +1,62 @@
+#!/bin/bash
+
+cd $HOME
+if [ ! -d dse-6.8.0 ]; then
+   wget https://downloads.datastax.com/enterprise/dse-6.8-0.tar.gz
+   tar -xzf dse-6.8.0.tar.gz
+   rm dse-6.8.0.tar.gz
+fi
+cd dse-6.8.0
+
+kill $(lsof -i:9042 | grep LISTEN | awk '{print $2}')
+
+if [ $(echo $PATH | grep dse-6.8.0/bin | wc -l) -lt 1 ]; then
+   echo "PATH=\"\$PATH:\$HOME/dse-6.8.0/bin:\$HOME/dse-6.8.0/resources/cassandra/tools/bin\"" >> $HOME/.bashrc
+fi
+
+# Install libaio
+sudo apt-get install -y libaio1
+
+# Create folders
+sudo mkdir -p /var/log/cassandra
+sudo mkdir -p /var/log/spark/worker
+sudo mkdir -p /var/log/spark/master
+sudo mkdir -p /var/log/spark/alwayson_sql
+sudo touch /var/log/spark/alwayson_sql/service.log
+sudo mkdir -p /var/lib/cassandra
+sudo mkdir -p /var/lib/cassandra/data
+sudo mkdir -p /var/lib/cassandra/hints
+sudo mkdir -p /var/lib/cassandra/metadata
+sudo mkdir -p /var/lib/cassandra/commitlog
+sudo mkdir -p /var/lib/cassandra/cdc_raw
+sudo mkdir -p /var/lib/cassandra/saved_caches
+sudo chown -R ubuntu:ubuntu /var/lib/cassandra
+sudo chown -R ubuntu:ubuntu /var/log/cassandra
+sudo chown -R ubuntu:ubuntu /var/log/spark
+sudo mkdir -p /var/lib/spark/worker
+sudo mkdir -p /var/lib/spark/rdd
+sudo mkdir -p /var/lib/dsefs
+sudo chown -R ubuntu:ubuntu /var/lib/spark
+sudo chown -R ubuntu:ubuntu /var/lib/dsefs
+
+# Turn on Always-On SQL
+sudo sed -i 's/^cluster_name:.*$/cluster_name: Demo Cluster/' $HOME/dse-6.8.0/resources/cassandra/conf/cassandra.yaml
+sudo sed -i 's/#     gremlin_server:/    gremlin_server:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#         scriptEngines:/       scriptEngines:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#            gremlin-groovy:/           gremlin-groovy:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#                 config:/                config:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#                     sandbox_enabled: false/                    sandbox_enabled: false/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/# graph:/graph:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/# realtime_evaluation_timeout_in_seconds: 30/realtime_evaluation_timeout_in_seconds: 300/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/# resource_manager_options:/resource_manager_options:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#     worker_options:/    worker_options:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#         cores_total: 0.7/        cores_total: 2/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#         memory_total: 0.6/        memory_total: 0.6/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#         workpools:/        workpools:/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#             - name: alwayson_sql/            - name: alwayson_sql/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#               cores: 0.25/              cores: 0.25/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/#               memory: 0.25/              memory: 0.3/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+sudo sed -i 's/# alwayson_sql_options:/alwayson_sql_options:\\n      enabled: true/g' $HOME/dse-6.8.0/resources/dse/conf/dse.yaml
+
+# Start DSE with everything enabled 
+$HOME/dse-6.8.0/bin/dse cassandra -s -k -g
