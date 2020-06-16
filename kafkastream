@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "deleting topic"
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --delete --topic product-ratings
+echo "generating stream"
+i=1
+#add data to the product-ratings topic in Kafka
+#Still need to figure out exactly how this is read in Spark... then can figure out what format is best for the message
+while [ true ];
+do
+    echo "while $i";
+    while read -r line; sleep 1; do echo $line | awk -F'\t' -v OFS='\t' '{print $0 $1 $2+$i}'; done < ./sales_observations | kafka-console-producer.sh --bootstrap-server localhost:9092 --topic product-ratings
+    echo $line
+    i=$((i+1));
+done

@@ -2,7 +2,7 @@
 
 This is a guide for how to use the power tools machine learning streaming product recommendation asset brought to you by the Vanguard team.
 
-Upgraded for DSE 6.0
+Upgraded for DataStax Enterprise 6.8 and replaced Netcat to use Apache Kafka instead.
 
 ### Motivation
 

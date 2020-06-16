@@ -1,9 +1,10 @@
-websocketd
-che
+#websocketd
+#che
 mvn
-dsefs
-hugo
-stream
+#dsefs
+#hugo
+#stream
+kafka
 streamingJob
 productTable
 uploadNotebook
