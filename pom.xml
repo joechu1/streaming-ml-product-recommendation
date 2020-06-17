@@ -4,16 +4,17 @@
 
   <groupId>com.datastax.powertools.analytics</groupId>
   <artifactId>StreamingMLProductRecommendations</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
   <packaging>jar</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dse.version>6.0.0</dse.version>
-    <scala.version>2.11.8</scala.version>
+    <dse.version>6.8.0</dse.version>
+    <scala.version>2.11.12</scala.version>
     <scala.main.version>2.11</scala.main.version>
+    <spark.version>2.4.0</spark.version>
     <scalatest.version>3.0.0</scalatest.version>
-    <connector.version>2.0.7</connector.version>
+    <connector.version>2.4.0</connector.version>
     <junit.version>4.12</junit.version>
   </properties>
 
@@ -34,17 +35,31 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <!-- Your dependencies, 'provided' are not included in jar -->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.commons</groupId>-->
-      <!--<artifactId>commons-math3</artifactId>-->
-      <!--<version>3.6.1</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.commons</groupId>-->
-      <!--<artifactId>commons-csv</artifactId>-->
-      <!--<version>1.0</version>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql-kafka-0-10_${scala.main.version}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_${scala.main.version}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming-kafka-0-10_${scala.main.version}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-xml_2.11</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-parser-combinators_2.11</artifactId>
+      <version>1.0.2</version>
+    </dependency>
 
     <!-- Test Dependencies -->
     <dependency>
@@ -65,14 +80,18 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.databricks</groupId>
-      <artifactId>spark-csv_2.11</artifactId>
-      <version>1.5.0</version>
-    </dependency>
   </dependencies>
 
   <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>https://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
     <repository>
       <id>DataStax-Repo</id>
       <url>https://repo.datastax.com/public-repos/</url>
