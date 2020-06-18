@@ -1,7 +1,6 @@
 #!/bin/bash
 
-IP=$(ifconfig | awk '/inet/ { print $2 }' | egrep -v '^fe|^127|^192|^172|::' | head -1)
-IP=${IP#addr:}
+IP=$(hostname -i)
 
 if [[ $HOSTNAME == "node"* ]] ; then
     #rightscale
@@ -15,9 +14,9 @@ fi
 
 #cqlsh "$IP" -e << EOF
 cqlsh "$IP" -e "
-CREATE KEYSPACE recommendations WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
-create table  if not exists recommendations.product
-(product_class_id int,
+CREATE KEYSPACE IF NOT EXISTS recommendations WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
+CREATE table IF NOT EXISTS recommendations.product( 
+product_class_id int,
 product_id int PRIMARY KEY,
 brand_name text,
 product_name text,

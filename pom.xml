@@ -42,14 +42,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-streaming_${scala.main.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.spark</groupId>
       <artifactId>spark-streaming-kafka-0-10_${scala.main.version}</artifactId>
       <version>${spark.version}</version>
     </dependency>
+    <!-- Added these just because these need to be downloaded if want to try the code from Spark Shell -->
     <dependency>
       <groupId>org.scala-lang.modules</groupId>
       <artifactId>scala-xml_2.11</artifactId>
@@ -59,6 +55,21 @@
       <groupId>org.scala-lang.modules</groupId>
       <artifactId>scala-parser-combinators_2.11</artifactId>
       <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.lz4</groupId>
+      <artifactId>lz4-java</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial.snappy</groupId>
+      <artifactId>snappy-java</artifactId>
+      <version>1.1.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.16</version>
     </dependency>
 
     <!-- Test Dependencies -->

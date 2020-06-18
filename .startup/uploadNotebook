@@ -22,7 +22,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     INNER_SUFFIX=macos-64bit
 fi
 
-FILENAME=Streaming_ML_Product_Recommendation_2018-07-09_14_37_48.studio-nb.tar
+FILENAME=Streaming_ML_Product_Recommendation_2020-06-18_06_41_14.studio-nb.tar
 
 TIMEOUT=120
 i=$TIMEOUT

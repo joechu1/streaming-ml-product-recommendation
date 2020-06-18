@@ -41,29 +41,21 @@ asset run `./startup all` for other options run `./startup`
 
 ## Requirements:
 
-Probably needs at least m5.xlarge, tried m5.large but doesn't seem to be enough memory.
+Best with a m5.xlarge at least. m5.large was not enough memory.
+
+## Automatic Usage:
+
+```
+./startup all
+```
 
 ## Manual Usage:
 
-### Prep the files:
-
-Make sure dsefs is turned on `dse.yaml` 
-
-    dsefs_option
-        enabled: true
-
-And push the raw data file into the root directory of dsefs:
-
-```
-dsefs / > put ./sales_observations sales_observations
-dsefs / > ls sales_observations
-sales_observations
-```
-
 ### Streaming Job:
-To run this on your local machine, you need to first run a Netcat server
 
-    $ nc -lk 9999
+You can compile and run the example with `./startup streamingJob`
+
+Otherwise...
 
 Build:
 
@@ -73,41 +65,83 @@ and then run the example:
 
     $ dse spark-submit --deploy-mode cluster --supervise  --class
     com.datastax.powertools.analytics.SparkMLProductRecommendationStreamingJob
-    ./target/StreamingMLProductRecommendations-0.1.jar localhost 9999
+    ./target/StreamingMLProductRecommendations-0.2.jar localhost 9092
 
-To run the  model, predict via streaming, and serve results via JDBC, run the
-ServeJDBC class
-
-    $ dse spark-submit --class
-    com.datastax.powertools.analytics.SparkMLProductRecommendationServeJDBC
-    ./target/StreamingMLProductRecommendations-0.1.jar localhost 9999
-
-
-    $ dse beeline
-
-    > !connect jdbc:hive2://localhost:10000
-
-    > select * from recommendations.predictions where user=10277 order by prediction desc;
-
-
-Into the `nc` prompt paste a few records and see the change in beeline:
+At the moment, only Spark Shell seems to work, here are my notes for that:
 
 ```
-102779564.0000
-1027795649564.0000
-1027515254.0000
-1027795649564744.0000
-10277956495647442304.0000
-102751525415254.0000
-102779564956474423042304.0000
-10277   221     4
-10277   221     1
+dse spark --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0,org.apache.spark:spark-streaming-kafka-0-10_2.11:2.4.0
+
+mport org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{SQLContext, SaveMode, SparkSession}
+import org.apache.spark.ml.recommendation.ALS
+import org.apache.spark.sql.types.{IntegerType, LongType, FloatType}
+import org.apache.spark.sql.DataFrame
+
+
+// Create the context with a 1 second batch size
+    val conf = new SparkConf().setAppName("SparkMLProductRecommendation")
+    val sc = SparkContext.getOrCreate(conf)
+
+    //Start sql context to read flat file
+    val sqlContext = new SQLContext(sc)
+
+    //train with batch file:
+    //get the raw data
+    val trainingData = sqlContext.read.format("csv")
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .option("delimiter", ":")
+      .load("dsefs:///sales_observations")
+      .cache()
+
+    //Instantiate our estimator
+    val algorithm = new ALS()
+      .setMaxIter(5)
+      .setRegParam(0.01)
+      .setImplicitPrefs(true)
+      .setUserCol("user")
+      .setItemCol("item")
+      .setRatingCol("preference")
+
+    //val algorithm = new LatentMatrixFactorization()
+    //train the Estimator against the training data from the file to produce a trained Transformer.
+    val model = algorithm.fit(trainingData)
+
+    val spark = SparkSession.builder.appName("SparkMLProductRecommendations").getOrCreate()
+import spark.implicits._
+
+val inputDF = spark.readStream                                     // Get the DataStreamReader
+  .format("kafka")                                                 // Specify the source format as "kafka"
+  .option("kafka.bootstrap.servers", "localhost:9092")    // Configure the Kafka server name and port
+  .option("subscribe", "product-ratings")                          // Subscribe to the "en" Kafka topic
+  .option("startingOffsets", "earliest")                           // Rewind stream to beginning when we restart notebook
+  .option("maxOffsetsPerTrigger", 1000)                            // Throttle Kafka's processing of the streams
+  .load()                                                          // Load the DataFrame
+  .select("value").selectExpr("CAST(value AS STRING)").as[(String)]
+
+val splitDF = inputDF.withColumn("_tmp", split($"value", "\\:")).select(
+   $"_tmp".getItem(0).as("user").cast(IntegerType),
+   $"_tmp".getItem(1).as("item").cast(IntegerType),
+   $"_tmp".getItem(2).as("preference").cast(FloatType)
+)
+
+val query = splitDF.writeStream.foreachBatch { (batchDF: DataFrame, batchId: Long) =>
+   //batchDF.show(10)
+   batchDF.write.cassandraFormat("user_ratings", "recommendations").mode(SaveMode.Append).save
+
+   //now predict against the live stream
+   //this gives us predicted ratings for the item user combination fed from the stream
+   val predictions = model.transform(batchDF).cache();
+   predictions.show(10)
+   predictions.write.cassandraFormat("predictions", "recommendations").mode(SaveMode.Append).save
+}.start()
+query.awaitTermination()
 ```
 
-Alternatively, you can run `./socketstream` to write a record per second to the stream from bash
+Also, start the Kafka stream with `./kafkastream`
 
-
-### Docs
+### Docs (Untested)
 
 pull in your submodules
 

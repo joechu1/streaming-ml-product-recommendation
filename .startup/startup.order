@@ -2,12 +2,12 @@
 #che
 mvn
 dse
-#dsefs
 #hugo
 #stream
 kafka
-streamingJob
+dsefs
 productTable
+streamingJob
 studio
 uploadNotebook
 #mysql

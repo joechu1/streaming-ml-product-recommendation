@@ -4,5 +4,12 @@ echo "deleting topic"
 kafka-topics.sh --zookeeper 127.0.0.1:2181 --delete --topic product-ratings
 echo "generating stream"
 #add data to the product-ratings topic in Kafka
-#Still need to figure out exactly how this is read in Spark... then can figure out what format is best for the message
-while read -r line; sleep 1; do echo $line | awk -F'\t' -v OFS='\t' '{print $0}'; done < ./sales_observations | kafka-console-producer.sh --bootstrap-server localhost:9092 --topic product-ratings
+#while read -r line; sleep 1; do echo $line | awk -F'\t' -v OFS='\t' '{print $0}'; done < ./sales_observations | kafka-console-producer.sh --broker-list "localhost:9092" --topic product-ratings
+{
+  read
+  while IFS=, read -r line
+  sleep 1
+  do 
+     echo "$line"
+  done
+} < ./sales_observations | kafka-console-producer.sh --broker-list "localhost:9092" --topic product-ratings
